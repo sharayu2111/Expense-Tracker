@@ -1,0 +1,28 @@
+# Maven build output
+/target/
+
+# Local IDE files
+/.idea/
+*.iml
+*.ipr
+*.iws
+
+# Tomcat and runtime temp data
+/temp/
+/tomcat.8080/
+
+# Database files
+*.db
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IntelliJ
+out/
+
+# VS Code
+.vscode/
