@@ -8,11 +8,11 @@ public class MainFrame extends JFrame {
     
     public MainFrame() {
         setTitle("Personal Expense Tracker");
-        setSize(1000, 700);
+        setSize(1150, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         
-        // Show Login Panel first
+        // Initialize the first panel (Standard Login Screen)
         setContentPane(new LoginPanel(this));
     }
     
@@ -25,7 +25,11 @@ public class MainFrame extends JFrame {
     public static void startGUI() {
         SwingUtilities.invokeLater(() -> {
             try {
-                UIManager.setLookAndFeel(new FlatLightLaf());
+                UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
+                UIManager.put("Button.arc", 10);
+                UIManager.put("Component.arc", 10);
+                UIManager.put("ProgressBar.arc", 10);
+                UIManager.put("TextComponent.arc", 10);
             } catch (Exception ex) {
                 System.err.println("Failed to initialize Flatlaf");
             }

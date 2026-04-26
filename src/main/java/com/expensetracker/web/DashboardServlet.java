@@ -2,6 +2,7 @@ package com.expensetracker.web;
 
 import com.expensetracker.dao.ITransactionDAO;
 import com.expensetracker.dao.TransactionDAOImpl;
+import com.expensetracker.dao.AdvancedDAO;
 import com.expensetracker.model.Transaction;
 
 import javax.servlet.ServletException;
@@ -103,6 +104,12 @@ public class DashboardServlet extends HttpServlet {
         req.setAttribute("chartLabels", labelsJson.equals("[]") ? "[\"No Data\"]" : labelsJson);
         req.setAttribute("chartData", dataJson.equals("[]") ? "[1]" : dataJson);
         
+        // --- Add PRO Features Data ---
+        AdvancedDAO advDao = new AdvancedDAO();
+        req.setAttribute("goalsList", advDao.getGoals());
+        req.setAttribute("splitsList", advDao.getSplits());
+        req.setAttribute("subsList", advDao.getSubscriptions());
+        
         req.getRequestDispatcher("/index.jsp").forward(req, resp);
     }
     
@@ -124,7 +131,8 @@ public class DashboardServlet extends HttpServlet {
                 }
             }
         } else {
-            String type = req.getParameter("type");
+        String type = req.getParameter("type");
+        if (type != null) {
             String amountStr = req.getParameter("amount");
             String category = req.getParameter("category");
             String description = req.getParameter("description");
@@ -141,6 +149,23 @@ public class DashboardServlet extends HttpServlet {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        } 
+        
+        // PRO Features Post Actions
+        AdvancedDAO advDao = new AdvancedDAO();
+        if ("toggleSplit".equals(action)) {
+            advDao.toggleSplitStatus(Integer.parseInt(req.getParameter("id")));
+        } else if ("toggleSub".equals(action)) {
+            advDao.toggleSubStatus(Integer.parseInt(req.getParameter("id")));
+        } else if ("addGoal".equals(action)) {
+            advDao.addGoal(req.getParameter("name"), Double.parseDouble(req.getParameter("target")), Double.parseDouble(req.getParameter("saved")));
+        } else if ("addSplit".equals(action)) {
+            double total = Double.parseDouble(req.getParameter("total"));
+            int parts = Integer.parseInt(req.getParameter("parts"));
+            advDao.addSplit(req.getParameter("group"), req.getParameter("desc"), total, parts, total/parts);
+        } else if ("addSub".equals(action)) {
+            advDao.addSubscription(req.getParameter("name"), Double.parseDouble(req.getParameter("cost")), Integer.parseInt(req.getParameter("day")));
         }
         
         resp.sendRedirect(req.getContextPath() + "/dashboard");

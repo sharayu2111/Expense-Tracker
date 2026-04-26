@@ -1,9 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page import="com.expensetracker.model.Transaction" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%
     List<Transaction> transactions = (List<Transaction>) request.getAttribute("transactions");
+    List<Map<String, Object>> goalsList = (List<Map<String, Object>>) request.getAttribute("goalsList");
+    List<Map<String, Object>> splitsList = (List<Map<String, Object>>) request.getAttribute("splitsList");
+    List<Map<String, Object>> subsList = (List<Map<String, Object>>) request.getAttribute("subsList");
     List<Transaction> recentTransactions = (List<Transaction>) request.getAttribute("recentTransactions");
     
     Double totalIncome = (Double) request.getAttribute("totalIncome");
@@ -396,8 +400,109 @@
                     </table>
                 </div>
             </div>
-        </div>
+    </div>
 
+    <!-- ADVANCED PRO FEATURES SECTION -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 animate-fade" style="animation-delay: 0.9s;">
+            <div class="card card-custom p-4" style="background: #ffffff; color: #2d3748; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <h3 class="mb-4 text-primary"><i class="fa-solid fa-rocket me-2"></i>Advanced Finance Hub</h3>
+                
+                <div class="row g-4">
+                    <!-- Savings Goals -->
+                    <div class="col-lg-4">
+                        <div class="p-3 border rounded h-100" style="background: #f8f9fa; border-color: #e2e8f0!important;">
+                            <h5 class="mb-3 text-dark"><i class="fa-solid fa-bullseye me-2 text-info"></i>Savings Goals</h5>
+                            <% if (goalsList != null && !goalsList.isEmpty()) { 
+                                for (Map<String, Object> goal : goalsList) { 
+                                    double target = (Double) goal.get("target");
+                                    double saved = (Double) goal.get("saved");
+                                    int pct = (int)((saved / target) * 100);
+                            %>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span><%= goal.get("name") %></span>
+                                        <span><%= pct %>%</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px; background: #e2e8f0;">
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: <%= pct %>%;"></div>
+                                    </div>
+                                    <div class="text-end small text-muted mt-1">₹<%= saved %> / ₹<%= target %></div>
+                                </div>
+                            <%  } 
+                               } else { %>
+                                <p class="text-muted small">No active goals found.</p>
+                            <% } %>
+                        </div>
+                    </div>
+                    
+                    <!-- Splitwise Equivalents -->
+                    <div class="col-lg-4">
+                        <div class="p-3 border rounded h-100" style="background: #f8f9fa; border-color: #e2e8f0!important;">
+                            <h5 class="mb-3 text-dark"><i class="fa-solid fa-handshake me-2 text-success"></i>Split Expenses</h5>
+                            <ul class="list-group list-group-flush" style="background: transparent;">
+                            <% if (splitsList != null && !splitsList.isEmpty()) { 
+                                for (Map<String, Object> s : splitsList) { %>
+                                <li class="list-group-item bg-transparent text-dark border-light px-0">
+                                    <div class="fw-bold"><%= s.get("group") %>: <%= s.get("desc") %></div>
+                                    <div class="small text-muted">You owe: <span class="text-success fw-bold">₹<%= s.get("owe") %></span> (Total: ₹<%= s.get("total") %>)</div>
+                                    <form action="<%= request.getContextPath() %>/dashboard" method="POST" class="mt-2">
+                                        <input type="hidden" name="action" value="toggleSplit">
+                                        <input type="hidden" name="id" value="<%= s.get("id") %>">
+                                        <button type="submit" class="btn btn-sm <%= "PAID".equals(s.get("status")) ? "btn-outline-success" : "btn-warning" %>">
+                                            <%= "PAID".equals(s.get("status")) ? "🟢 PAID" : "🔴 DUE" %>
+                                        </button>
+                                    </form>
+                                </li>
+                            <%  } 
+                               } else { %>
+                                <p class="text-muted small">No split expenses found.</p>
+                            <% } %>
+                            </ul>
+                            <button class="btn btn-sm btn-outline-success w-100 mt-3" data-bs-toggle="modal" data-bs-target="#addSplitModal">+ Add Split</button>
+                        </div>
+                    </div>
+
+                    <!-- Subscriptions -->
+                    <div class="col-lg-4">
+                        <div class="p-3 border rounded h-100" style="background: #f8f9fa; border-color: #e2e8f0!important;">
+                            <h5 class="mb-3 text-dark"><i class="fa-solid fa-repeat me-2 text-warning"></i>Subscriptions</h5>
+                            <ul class="list-group list-group-flush" style="background: transparent;">
+                            <% if (subsList != null && !subsList.isEmpty()) { 
+                                double totalSub = 0;
+                                for (Map<String, Object> sub : subsList) { 
+                                    totalSub += (Double) sub.get("cost");
+                            %>
+                                <li class="list-group-item bg-transparent text-dark border-light px-0">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="fw-bold"><%= sub.get("name") %> <span class="small text-muted fw-normal">(@<%= sub.get("due_day") %>)</span></span>
+                                        <span class="fw-bold">₹<%= sub.get("cost") %></span>
+                                    </div>
+                                    <form action="<%= request.getContextPath() %>/dashboard" method="POST">
+                                        <input type="hidden" name="action" value="toggleSub">
+                                        <input type="hidden" name="id" value="<%= sub.get("id") %>">
+                                        <button type="submit" class="btn btn-sm <%= "PAID".equals(sub.get("status")) ? "btn-outline-success" : "btn-warning" %>">
+                                            <%= "PAID".equals(sub.get("status")) ? "🟢 PAID" : "🔴 DUE" %>
+                                        </button>
+                                    </form>
+                                </li>
+                            <%  } %>
+                                <li class="list-group-item bg-transparent text-dark border-light px-0 text-end">
+                                    <strong>Monthly Total: ₹<%= totalSub %></strong>
+                                </li>
+                            <% } else { %>
+                                <p class="text-muted small">No active subscriptions found.</p>
+                            <% } %>
+                            </ul>
+                            <button class="btn btn-sm btn-outline-warning w-100 mt-3" data-bs-toggle="modal" data-bs-target="#addSubModal">+ Add Subscription</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- End Container -->
     </div>
 
     <!-- Add Transaction Modal -->
@@ -436,6 +541,44 @@
               <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px;">Cancel</button>
               <button type="submit" class="btn btn-primary" style="background: var(--primary); border: none; border-radius: 10px;">Save Transaction</button>
             </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRO MODALS -->
+    <!-- Add Split Modal -->
+    <div class="modal fade" id="addSplitModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form action="<%= request.getContextPath() %>/dashboard" method="POST">
+            <input type="hidden" name="action" value="addSplit">
+            <div class="modal-header"><h5 class="modal-title">Log Split Expense</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                Group Name: <input type="text" name="group" class="form-control mb-2" required>
+                Description: <input type="text" name="desc" class="form-control mb-2" required>
+                Total Bill: <input type="number" name="total" class="form-control mb-2" required>
+                Participants: <input type="number" name="parts" class="form-control mb-2" required>
+            </div>
+            <div class="modal-footer"><button type="submit" class="btn btn-success w-100">Add Split</button></div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Sub Modal -->
+    <div class="modal fade" id="addSubModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form action="<%= request.getContextPath() %>/dashboard" method="POST">
+            <input type="hidden" name="action" value="addSub">
+            <div class="modal-header"><h5 class="modal-title">New Subscription</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                Subscription Name: <input type="text" name="name" class="form-control mb-2" required>
+                Monthly Cost: <input type="number" name="cost" class="form-control mb-2" required>
+                Due Day (1-31): <input type="number" name="day" class="form-control mb-2" required>
+            </div>
+            <div class="modal-footer"><button type="submit" class="btn btn-warning w-100">Add Subscription</button></div>
           </form>
         </div>
       </div>

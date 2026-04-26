@@ -35,7 +35,8 @@ public class LoginPanel extends JPanel {
             String pwd = new String(passwordField.getPassword());
             
             if (uname.equals("admin") && pwd.equals("admin")) {
-                parent.loadDashboard();
+                parent.setContentPane(new PinLoginPanel(parent));
+                parent.revalidate();
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials", "Error", JOptionPane.ERROR_MESSAGE);
             }

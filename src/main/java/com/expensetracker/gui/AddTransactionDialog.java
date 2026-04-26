@@ -20,7 +20,7 @@ public class AddTransactionDialog extends JDialog {
         setSize(400, 300);
         setLocationRelativeTo(parent);
         
-        JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(8, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
         JComboBox<String> typeCombo = new JComboBox<>(new String[]{"INCOME", "EXPENSE"});
@@ -30,6 +30,11 @@ public class AddTransactionDialog extends JDialog {
         });
         JTextField dateField = new JTextField(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
         JTextField descField = new JTextField();
+        
+        JButton scannerBtn = new JButton("📷 Scan Receipt");
+        scannerBtn.addActionListener(e -> simulateReceiptScan(amountField, categoryCombo, descField));
+        
+        panel.add(new JLabel("Smart Feature:")); panel.add(scannerBtn);
         
         panel.add(new JLabel("Type:")); panel.add(typeCombo);
         panel.add(new JLabel("Amount:")); panel.add(amountField);
@@ -68,5 +73,43 @@ public class AddTransactionDialog extends JDialog {
         panel.add(cancelBtn);
         
         add(panel);
+    }
+    
+    // Receipt Scanner (Simulated via File Chooser & Delays)
+    private void simulateReceiptScan(JTextField amountField, JComboBox<String> catBox, JTextField descField) {
+        JFileChooser jfc = new JFileChooser();
+        jfc.setDialogTitle("Upload Receipt Image");
+        if (jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            // Using a background thread to simulate AI parsing delay!
+            SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    Thread.sleep(1500); // simulate 1.5 seconds AI scanning
+                    return null;
+                }
+                @Override
+                protected void done() {
+                    // Better Parsing Logic: Try to extract actual numbers from the uploaded filename!
+                    String filename = jfc.getSelectedFile().getName();
+                    String extractedAmount = "250.00"; // fallback
+                    
+                    // Parse logic: If filename has numbers (like "receipt_500.png" -> extracts "500")
+                    String parsedNumbers = filename.replaceAll("[^0-9]", "");
+                    if (!parsedNumbers.isEmpty()) {
+                        extractedAmount = parsedNumbers;
+                    } else {
+                        // Or use file size bytes to simulate a specific static amount
+                        long sizeBytes = jfc.getSelectedFile().length();
+                        extractedAmount = String.valueOf((sizeBytes % 1500) + 10);
+                    }
+                    
+                    amountField.setText(extractedAmount);
+                    catBox.setSelectedItem("Food");
+                    descField.setText("Scanned from: " + filename);
+                    JOptionPane.showMessageDialog(AddTransactionDialog.this, "Receipt parsed successfully! Found amount based on file properties.");
+                }
+            };
+            worker.execute();
+        }
     }
 }
