@@ -3,19 +3,19 @@
 ## Overview
 A complete Java-based Personal Expense Tracker System that features both a robust **Swing Desktop GUI** and an integrated **Web Dashboard (JSP & Servlets)** running on an embedded Tomcat server.
 
-Key highlights include Object-Oriented Programming (OOP) concepts, SQLite database integration, File handling, multithreading for responsiveness, exception handling, and visually appealing UI panels.
+Key highlights include Object-Oriented Programming (OOP) concepts, MySQL database integration, File handling, multithreading for responsiveness, exception handling, and visually appealing UI panels.
 
 ## Features
 - **Smart GUI Dashboard**: Includes Summary Cards, JFreeChart pie chart breakdowns, and interactive JTables.
 - **Web Dashboard**: An embedded Tomcat web server provides an HTML/Bootstrap frontend available at `http://localhost:8080/dashboard`.
 - **Financial Tools**: Easily track Incomes, Expenses, View Balances, and get Budget Alerts.
-- **Data Persistence**: Uses a lightweight SQLite database requiring zero setup.
+- **Data Persistence**: Uses MySQL database for reliable data storage.
 
 ## Technologies Used
 - **Core Java**: Java 11
 - **GUI Engine**: Java Swing + FormDev FlatLaf (Modern Look and Feel)
 - **Web App**: Servlets, JSP, Embedded Apache Tomcat
-- **Database**: SQLite & JDBC
+- **Database**: MySQL & JDBC
 - **Charting**: JFreeChart
 - **Build Tool**: Maven
 
